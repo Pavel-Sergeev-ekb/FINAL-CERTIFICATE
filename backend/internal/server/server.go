@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/Pavel-Sergeev-ekb/FINAL-CERTIFICATE/internal/handlers"
+	"github.com/Pavel-Sergeev-ekb/FINAL-CERTIFICATE/backend/internal/handlers"
 )
 
 type AppServer struct {
@@ -37,6 +37,11 @@ func NewServer(logger *log.Logger) *AppServer {
 
 }
 func GetPort() int {
+
+	server := &http.Server{
+		Addr: ":7540",
+	}
+
 	envPort := os.Getenv("TODO_PORT")
 	if envPort != "" {
 		port, err := strconv.Atoi(envPort)
@@ -44,7 +49,7 @@ func GetPort() int {
 			return port
 		}
 	}
-	_, portStr, _ := net.SplitHostPort(server.addr)
+	_, portStr, _ := net.SplitHostPort(server.Addr)
 	port, _ := strconv.Atoi(portStr)
 	return port
 }
