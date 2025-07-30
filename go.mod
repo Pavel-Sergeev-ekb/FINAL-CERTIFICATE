@@ -1,3 +1,3 @@
-module main.go
+module "github.com/Pavel-Sergeev-ekb/FINAL-CERTIFICATE"
 
-go 1.23.6
+go 1.24.0
