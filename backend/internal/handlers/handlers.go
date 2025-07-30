@@ -24,4 +24,5 @@ func BaseHandle(h http.ResponseWriter, r *http.Request) {
 	}
 
 	http.ServeFile(h, r, filePath)
+
 }
