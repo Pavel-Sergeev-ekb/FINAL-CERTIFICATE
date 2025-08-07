@@ -2,59 +2,91 @@ package data
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
-	"time"
 
-	_ "github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite"
 )
+
+var db *sql.DB
+var idInt int64
 
 const schema = `
 CREATE TABLE IF NOT EXISTS scheduler (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			title VARCHAR(255) NOT NULL, 
 			comment TEXT, 
-			date TIMESTAMP NOT NULL,
-			repeat VARCHAR(50), 
-			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+			date CHAR(8) NOT NULL DEFAULT '',
+			repeat VARCHAR(50)
 );
 
-CREATE INDEX idx_date ON scheduler(date);
+CREATE INDEX IF NOT EXISTS  idx_scheduler_date ON scheduler(date);
 `
 
-func InitDB(db *sql.DB) error {
+func InitDB(dbFile string) error {
 
-	dbPath := GetDBPath()
+	_, err := os.Stat(dbFile)
 
-	_, err := os.Stat(dbPath)
-	if os.IsNotExist(err) {
+	install := os.IsNotExist(err)
 
-		db, err := sql.Open("sqlite3", dbPath)
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer db.Close()
+	var errOpen error
 
-		_, err = db.Exec(schema)
-		if err != nil {
-			log.Fatal(err)
-		}
+	db, errOpen := sql.Open("sqlite", dbFile)
+	if errOpen != nil {
+		return fmt.Errorf("failed to open db: %w", err)
 	}
-	return err
+	defer db.Close()
+
+	if install {
+		if _, err = db.Exec(schema); err != nil {
+
+			return fmt.Errorf("failed to init schema: %w", err)
+
+		}
+
+	}
+	return nil
 }
 
-type Task struct {
-	ID        int
-	Date      string
-	Title     string
-	Comment   string
-	Repeat    string
-	createdAt time.Time
+func DeleteTask(id string) error {
+	if _, err := fmt.Sscan(id, &idInt); err != nil {
+		return fmt.Errorf("invalid id format: %w", err)
+	}
+	res, err := db.Exec(`DELETE FROM scheduler WHERE id = ?`, idInt)
+	if err != nil {
+		return fmt.Errorf("db delete error: %w", err)
+	}
+	n, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("rows affected error: %w", err)
+	}
+	if n == 0 {
+		return fmt.Errorf("task not found")
+	}
+	return nil
 }
 
-func FormatDate(date time.Time) string {
-	return date.Format("20060102")
+func UpdateDate(next, id string) error {
+	if _, err := fmt.Sscan(id, &idInt); err != nil {
+		return fmt.Errorf("invalid id format: %w", err)
+	}
+	res, err := db.Exec(
+		`UPDATE scheduler SET date = ? WHERE id = ?`, next, idInt,
+	)
+	if err != nil {
+		return fmt.Errorf("db update date error: %w", err)
+	}
+	m, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("rows affected error: %w", err)
+	}
+	if m == 0 {
+		return fmt.Errorf("task not found")
+	}
+
+	return nil
 }
 
 func GetDBPath() string {

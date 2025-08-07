@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"log"
 	"os"
 
@@ -11,16 +10,8 @@ import (
 
 func main() {
 
-	db, err := sql.Open("sqlite3", data.GetDBPath())
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
-
-	if err := db.Ping(); err != nil {
-		log.Fatal("failed to connect db:", err)
-	}
-	if err := data.InitDB(db); err != nil {
+	dbPath := data.GetDBPath()
+	if err := data.InitDB(dbPath); err != nil {
 		log.Fatal(err)
 	}
 
