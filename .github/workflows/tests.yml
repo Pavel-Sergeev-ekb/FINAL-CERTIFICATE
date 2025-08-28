@@ -26,6 +26,6 @@ jobs:
 
       - name: Run local server
         run: |
-          CGO_ENABLED=0 GOOS=linux go run /backend/cmd/main.go &
+          CGO_ENABLED=0 GOOS=linux go run ./backend/cmd/main.go &
           sleep 100
           go test -run ^TestApp$ ./tests
