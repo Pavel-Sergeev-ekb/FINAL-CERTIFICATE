@@ -17,37 +17,41 @@ const schema = `
 CREATE TABLE IF NOT EXISTS scheduler (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			title VARCHAR(255) NOT NULL, 
-			comment TEXT, 
+			comment TEXT , 
 			date CHAR(8) NOT NULL DEFAULT '',
 			repeat VARCHAR(50)
 );
 
-CREATE INDEX IF NOT EXISTS  idx_scheduler_date ON scheduler(date);
+CREATE INDEX IF NOT EXISTS  idx_date ON scheduler(date);
 `
 
-func InitDB(dbFile string) error {
+func Init(dbFile string) (*sql.DB, error) {
 
-	_, err := os.Stat(dbFile)
+	dbPath := GetDBPath()
+
+	_, err := os.Stat(dbPath)
 
 	install := os.IsNotExist(err)
 
 	var errOpen error
 
-	db, errOpen := sql.Open("sqlite", dbFile)
+	db, errOpen := sql.Open("sqlite", dbPath)
 	if errOpen != nil {
-		return fmt.Errorf("failed to open db: %w", err)
+		return nil, fmt.Errorf("failed to open db: %w", err)
 	}
-	defer db.Close()
+	if err := db.Ping(); err != nil {
+		return nil, fmt.Errorf("failed to ping db: %w", err)
+	}
 
 	if install {
 		if _, err = db.Exec(schema); err != nil {
 
-			return fmt.Errorf("failed to init schema: %w", err)
+			return nil, fmt.Errorf("failed to init schema: %w", err)
 
 		}
 
 	}
-	return nil
+	return db, nil
 }
 
 func DeleteTask(id string) error {

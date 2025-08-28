@@ -1,28 +1,44 @@
 package server
 
 import (
+	"database/sql"
+	"fmt"
 	"log"
-	"net"
 	"net/http"
 	"os"
 	"strconv"
 	"time"
 
-	"github.com/Pavel-Sergeev-ekb/FINAL-CERTIFICATE/backend/internal/handlers"
+	"github.com/Pavel-Sergeev-ekb/FINAL-CERTIFICATE/backend/internal/api"
+	"github.com/Pavel-Sergeev-ekb/FINAL-CERTIFICATE/backend/internal/services"
 )
 
 type AppServer struct {
 	Logger *log.Logger
 	Server *http.Server
+	DB     *sql.DB
 }
 
-func NewServer(logger *log.Logger) *AppServer {
+func NewServer(logger *log.Logger, db *sql.DB) *AppServer {
+
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/", handlers.BaseHandle)
+	mux.HandleFunc("/", BaseHandle)
 
+	mux.HandleFunc("/api/nextdate", api.NextDateHandler)
+
+	mux.HandleFunc("/api/signin", api.SignInHandler)
+
+	mux.HandleFunc("/api/task", services.AuthMiddleware(TaskHandler(db)))
+
+	mux.HandleFunc("/api/tasks", services.AuthMiddleware(api.GetTasksHandler(db)))
+
+	mux.HandleFunc("/api/task/done", services.AuthMiddleware(api.DoneHandler(db)))
+
+	// Fetch tasks (protected)
+	port := GetPort()
 	server := &http.Server{
-		Addr:         ":7540",
+		Addr:         fmt.Sprintf(":%d", port),
 		Handler:      mux,
 		ErrorLog:     logger,
 		ReadTimeout:  5 * time.Second,
@@ -33,14 +49,12 @@ func NewServer(logger *log.Logger) *AppServer {
 	return &AppServer{
 		Logger: logger,
 		Server: server,
+		DB:     db,
 	}
 
 }
-func GetPort() int {
 
-	server := &http.Server{
-		Addr: ":7540",
-	}
+func GetPort() int {
 
 	envPort := os.Getenv("TODO_PORT")
 	if envPort != "" {
@@ -49,7 +63,6 @@ func GetPort() int {
 			return port
 		}
 	}
-	_, portStr, _ := net.SplitHostPort(server.Addr)
-	port, _ := strconv.Atoi(portStr)
-	return port
+
+	return 7540
 }
