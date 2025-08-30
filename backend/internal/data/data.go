@@ -10,9 +10,6 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-var db *sql.DB
-var idInt int64
-
 const schema = `
 CREATE TABLE IF NOT EXISTS scheduler (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -27,6 +24,8 @@ CREATE INDEX IF NOT EXISTS  idx_date ON scheduler(date);
 
 func Init(dbFile string) (*sql.DB, error) {
 
+	var db *sql.DB
+
 	dbPath := GetDBPath()
 
 	_, err := os.Stat(dbPath)
@@ -35,7 +34,7 @@ func Init(dbFile string) (*sql.DB, error) {
 
 	var errOpen error
 
-	db, errOpen := sql.Open("sqlite", dbPath)
+	db, errOpen = sql.Open("sqlite", dbPath)
 	if errOpen != nil {
 		return nil, fmt.Errorf("failed to open db: %w", err)
 	}
@@ -55,6 +54,10 @@ func Init(dbFile string) (*sql.DB, error) {
 }
 
 func DeleteTask(id string) error {
+
+	var idInt int64
+	var db *sql.DB
+
 	if _, err := fmt.Sscan(id, &idInt); err != nil {
 		return fmt.Errorf("invalid id format: %w", err)
 	}
@@ -73,6 +76,10 @@ func DeleteTask(id string) error {
 }
 
 func UpdateDate(next, id string) error {
+
+	var idInt int64
+	var db *sql.DB
+
 	if _, err := fmt.Sscan(id, &idInt); err != nil {
 		return fmt.Errorf("invalid id format: %w", err)
 	}

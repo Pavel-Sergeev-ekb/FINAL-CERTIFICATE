@@ -23,7 +23,7 @@ func GenerateJWT(password string) (string, error) {
 	// Создаём токен
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"password_hash": password,
-		"exp":           time.Now().Add(8 * time.Hour).Unix(), // 8 часов жизни токена
+		"exp":           time.Now().Add(24 * time.Hour).Unix(), // 24 часов жизни токена
 	})
 
 	// Подписываем токен секретным ключом

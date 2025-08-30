@@ -1,11 +1,8 @@
 package server
 
 import (
-	"database/sql"
 	"net/http"
 	"path/filepath"
-
-	"github.com/Pavel-Sergeev-ekb/FINAL-CERTIFICATE/backend/internal/api"
 )
 
 const (
@@ -28,21 +25,4 @@ func BaseHandle(h http.ResponseWriter, r *http.Request) {
 
 	http.ServeFile(h, r, filePath)
 
-}
-
-func TaskHandler(db *sql.DB) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		switch r.Method {
-		case http.MethodPost:
-			api.AddTaskHandler(db)(w, r)
-		case http.MethodGet:
-			api.GetTaskHandler(db)(w, r)
-		case http.MethodPut:
-			api.EditTaskHandler(db)(w, r)
-		case http.MethodDelete:
-			api.DeleteTaskHandler(db)(w, r)
-		default:
-			http.Error(w, `{"error":"Method not supported"}`, http.StatusMethodNotAllowed)
-		}
-	}
 }

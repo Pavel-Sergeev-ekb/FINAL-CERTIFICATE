@@ -18,7 +18,7 @@ func generateJWT(password string) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"hash": hashPassword(password),
-		"exp":  time.Now().Add(8 * time.Hour).Unix(), // Токен действует 8 часов
+		"exp":  time.Now().Add(36 * time.Hour).Unix(), // Токен действует 8 часов
 	})
 
 	return token.SignedString([]byte(secret))
@@ -64,14 +64,14 @@ func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 		if pass != "" {
 			cookie, err := r.Cookie("token")
 			if err != nil {
-				http.Error(w, `{"error":"Authentication required"}`, http.StatusUnauthorized)
+				http.Error(w, `{"error":"authentication required"}`, http.StatusUnauthorized)
 				return
 			}
 
 			token := cookie.Value
 			storedHash, err := ValidateJWT(token)
 			if err != nil || storedHash != pass {
-				http.Error(w, `{"error":"Invalid token"}`, http.StatusUnauthorized)
+				http.Error(w, `{"error":"invalid token"}`, http.StatusUnauthorized)
 				return
 			}
 		}
