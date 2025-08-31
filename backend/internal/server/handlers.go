@@ -1,4 +1,4 @@
-package handlers
+package server
 
 import (
 	"net/http"
@@ -24,4 +24,5 @@ func BaseHandle(h http.ResponseWriter, r *http.Request) {
 	}
 
 	http.ServeFile(h, r, filePath)
+
 }
