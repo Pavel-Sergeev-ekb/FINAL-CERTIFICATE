@@ -1,6 +1,7 @@
 package data
 
 import (
+	"database/sql"
 	"fmt"
 )
 
@@ -13,6 +14,9 @@ type Task struct {
 }
 
 func NextDate(next string, id string) error {
+
+	var db *sql.DB
+
 	query := `UPDATE scheduler SET date = ? WHERE id = ?`
 	res, err := db.Exec(query, next, id)
 	if err != nil {

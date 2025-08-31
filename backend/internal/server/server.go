@@ -19,6 +19,8 @@ type AppServer struct {
 	DB     *sql.DB
 }
 
+const BasePort = 7540
+
 func NewServer(logger *log.Logger, db *sql.DB) *AppServer {
 
 	mux := http.NewServeMux()
@@ -29,7 +31,7 @@ func NewServer(logger *log.Logger, db *sql.DB) *AppServer {
 
 	mux.HandleFunc("/api/signin", api.SignInHandler)
 
-	mux.HandleFunc("/api/task", services.AuthMiddleware(TaskHandler(db)))
+	mux.HandleFunc("/api/task", services.AuthMiddleware(api.TaskHandler(db)))
 
 	mux.HandleFunc("/api/tasks", services.AuthMiddleware(api.GetTasksHandler(db)))
 
@@ -64,5 +66,5 @@ func GetPort() int {
 		}
 	}
 
-	return 7540
+	return BasePort
 }

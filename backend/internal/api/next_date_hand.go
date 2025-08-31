@@ -11,7 +11,7 @@ import (
 func NextDateHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != http.MethodGet {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
@@ -20,7 +20,7 @@ func NextDateHandler(w http.ResponseWriter, r *http.Request) {
 	repeatStr := r.FormValue("repeat")
 
 	if dStartStr == "" || repeatStr == "" {
-		http.Error(w, "Missing required parameters", http.StatusBadRequest)
+		http.Error(w, "missing required parameters", http.StatusBadRequest)
 		return
 	}
 
@@ -32,7 +32,7 @@ func NextDateHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		now, err = time.Parse("20060102", nowStr)
 		if err != nil {
-			http.Error(w, "Invalid date format for now", http.StatusBadRequest)
+			http.Error(w, "invalid date format for now", http.StatusBadRequest)
 			return
 		}
 	}
@@ -42,7 +42,7 @@ func NextDateHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	log.Printf("Successful calculation: nextDate=%s", next)
+	log.Printf("successful calculation: nextDate=%s", next)
 
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 

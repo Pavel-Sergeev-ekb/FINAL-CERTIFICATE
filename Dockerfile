@@ -2,15 +2,13 @@ FROM golang:1.24.0 AS builder
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y git
 
 COPY go.mod go.sum ./
 
-RUN go mod tidy
+RUN go mod download
 
 COPY . ./
 
-RUN ls -la
 
 RUN GOOS=linux GOARCH=amd64 go build -o /app/bin/final_project ./backend/cmd/main.go
 
